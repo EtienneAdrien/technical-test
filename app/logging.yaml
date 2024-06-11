@@ -1,0 +1,61 @@
+version: 1
+disable_existing_loggers: False
+filters:
+  correlation_id:
+    "()": "asgi_correlation_id.CorrelationIdFilter"
+    "uuid_length": 32
+    "default_value": "uuid"
+formatters:
+  default:
+    # "()": uvicorn.logging.DefaultFormatter
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+  app:
+    format: '%(asctime)s - %(name)s - %(correlation_id)s - %(pathname)s:%(lineno)s %(funcName)s() - %(levelname)s - %(message)s'
+  access:
+    # "()": uvicorn.logging.AccessFormatter
+    format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+handlers:
+  app:
+    formatter: app
+    filters: ["correlation_id"]
+    class: logging.StreamHandler
+    stream: ext://sys.stdout
+  default:
+    formatter: default
+    class: logging.StreamHandler
+    stream: ext://sys.stdout
+  access:
+    formatter: access
+    class: logging.StreamHandler
+    stream: ext://sys.stdout
+loggers:
+  app:
+    level: DEBUG
+    handlers:
+      - app
+    propagate: no
+  uvicorn:
+    level: INFO
+    handlers:
+      - default
+    propagate: no
+  uvicorn.access:
+    level: INFO
+    handlers:
+      - access
+    propagate: no
+  psycopg:
+    level: INFO
+    handlers:
+      - default
+    propagate: no
+  watchfiles:
+    level: ERROR
+    handlers:
+      - default
+    propagate: no
+root:
+  level: DEBUG
+  handlers:
+    - default
+  propagate: no

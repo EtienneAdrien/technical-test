@@ -1,0 +1,45 @@
+services:
+  app:
+    image: app:latest
+    build:
+      context: ./app
+      dockerfile: ./Dockerfile
+    ports:
+      - "8080:80"
+    volumes:
+      - ./app:/code/app
+    depends_on:
+      - redis
+      - database
+
+  database:
+    image: postgres:16.3-alpine
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./database:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+
+  redis:
+    image: redis:7.2.5-alpine
+    command: redis-server /redis.conf
+    volumes:
+      - ./redis:/data
+      - ./redis.conf:/redis.conf
+    ports:
+      - "6379:6379"
+
+  worker:
+    image: app:latest
+    build:
+      context: ./app
+      dockerfile: ./Dockerfile
+    command: arq app.utils.redis.connect.WorkerSettings
+    depends_on:
+      - redis
+      - database
+    volumes:
+      - ./app:/code/app
