@@ -5,6 +5,12 @@ To start the application, execute the following command:
 docker compose --profile app up --build -d
 ```
 
+The API and worker will wait for the databases containers to be healthy, but if you encounter any connection problem between them,
+restarting the containers should fix the problem.
+```
+docker compose restart app worker
+```
+
 This command will construct and initiate all containers in the background.
 
 Additionally, two volumes named database (for PostgreSQL) and redis (for Redis) will be created and linked in 
