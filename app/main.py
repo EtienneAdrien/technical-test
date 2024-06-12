@@ -16,6 +16,8 @@ async def lifespan(_):
     Start the database and redis connections, initialize the database schema and close connections on app shutdown.
     """
     await redis_pool().startup()
+    redis = await redis_pool().get_redis()
+    print(await redis.all_job_results())
     await init_database_schema()
     await connection_pool().open()
 

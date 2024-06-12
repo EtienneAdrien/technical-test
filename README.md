@@ -2,7 +2,7 @@
 To start the application, execute the following command:
 
 ```
-docker compose up --build -d
+docker compose --profile app up --build -d
 ```
 
 This command will construct and initiate all containers in the background.
@@ -24,36 +24,29 @@ For unit testing, a decision was made to employ a real database. While typically
 isolation and enable parallel execution, this approach was favored due to its simplicity in setup, absence of potential
 errors stemming from mocks, and minimal overhead.
 
-<br>
-----------------------------------
+## Stop the app
+```
+docker compose --profile app --profile dead-letter down --remove-orphans
+```
 
-# Building a user registration API
+## Architecture
+The app utilizes Redis as a message broker to facilitate asynchronous mail processing. When a new user is created, 
+a job is generated and picked up by a worker to send an email and mark the user code as active. This ensures that the 
+user can validate their account using the code. This approach guarantees that the email attempt is made even if the app 
+experiences downtime, and the user code is only activated after confirming the email was successfully sent.
 
-## Context
+If multiple retries fail to send the email, the event is redirected to a dead-letter queue. In this exercise, we won't handle these events extensively, but in a real scenario, we might implement mechanisms to retry the event or inspect its parameters to identify the issue.
 
-Our client handles user registrations. To do so, user creates an account and we send a code by email to verify the account.
+To test the dead-letter queue functionality, modify the `FORCE_JOB_TO_FAIL` variable in the `.env` file at the root of the project by setting it to 1
+```
+FORCE_JOB_TO_FAIL=1
+```
 
-As a core API developer, you are responsible for building this feature and expose it through API.
+When a new user is created, the send_mail function will fail, and the worker will queue the event in the dead-letter 
+queue. You can then use the following command to empty the queue and check which job failed:
+```
+docker compose --profile dead-letter up
+```
 
-## Specifications
-You have to manage a user registration and his activation. 
-
-The API must support the following use cases:
-* Create a user with an email and a password.
-* Send an email to the user with a 4 digits code.
-* Activate this account with the 4 digits code received. For this step, we consider a `BASIC AUTH` is enough to check if he is the right user.
-* The user has only one minute to use this code. After that, an error should be raised.
-
-Design and build this API. You are completely free to propose the architecture you want.
-
-## What do we expect?
-- Python language is required.
-- We expect to have a level of code quality which could go to production.
-- Using frameworks is allowed only for routing, dependency injection, event dispatcher, db connection. Don't use magic (for example SQLAlchemy, even without its ORM)! We want to see **your** implementation. 
-- Use the DBMS you want (except SQLite).
-- Consider the SMTP server as a third party service offering an HTTP API. You can mock the call, use a local SMTP server running in a container, or simply print the 4 digits in console. But do not forget in your implementation that **it is a third party service**. 
-- Your code should be tested.
-- Your application has to run within a docker containers. 
-- You should provide us the source code (or a link to GitHub)
-- You should provide us the instructions to run your code and your tests. We should not install anything except docker/docker-compose to run you project.
-- You should provide us an architecture schema.
+## Minimalistic architecture diagram
+![alt text](./arch.png)

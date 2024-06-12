@@ -28,7 +28,7 @@ share/python-wheels/
 *.egg
 
 # PyCharm files
-.idea/
+.idea/*
 *.iml
 *.ipr
 *.iws

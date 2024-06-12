@@ -61,7 +61,7 @@ async def _connect_user(
     """
     Wrapper around _verify_user_credentials to raise HTTPException on error.
     """
-    logging.logger("info", f"Authenticating user {credentials.username}")
+    logger.info(f"Authenticating user {credentials.username}")
 
     try:
         await _verify_user_credentials(
@@ -71,9 +71,7 @@ async def _connect_user(
             with_activation=with_activation,
         )
 
-        logging.logger(
-            "info", f"User {credentials.username} successfully authenticated"
-        )
+        logger.info(f"User {credentials.username} successfully authenticated")
 
     except exceptions.WrongUsernameOrPasswordError:
         logger.error("Failed to authenticate user, wrong username or password")

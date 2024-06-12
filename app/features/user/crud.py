@@ -20,7 +20,7 @@ async def create_user_with_code(conn: ACT, user: schemas.UserIn) -> (int, str):
     async with conn.transaction():
         await cursor.execute(
             "INSERT INTO user_data (email, password) VALUES (%s, %s) RETURNING user_id",
-            (user.email, password),
+            (user.email.lower(), password),
         )
 
         result = await cursor.fetchone()

@@ -6,6 +6,7 @@ from fastapi import status
 from fastapi.security import HTTPBasicCredentials
 from psycopg_pool.abc import ACT
 
+from app import config
 from app.features import user_code, user
 from app.features.schemas import Success, UnexpectedError
 from app.features.user import schemas, crud
@@ -37,9 +38,10 @@ async def create_user(
         email=user_.email,
         user_id=user_id,
         user_code=user_code_,
+        _queue_name=config.QUEUE_NAME,
     )
 
-    logger.info(f"User {user_id} successfully created with code {user_code}")
+    logger.info(f"User {user_id} successfully created with code {user_code_}")
 
     return schemas.UserCreatedResponse(user_id=user_id)
 

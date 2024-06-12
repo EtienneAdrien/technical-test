@@ -1,6 +1,7 @@
 import pytest
 from arq import Retry
 
+from app import config
 from app.features.user_code import jobs
 
 
@@ -11,13 +12,20 @@ async def test_handle_post_user_creation_job(
     code = await create_user_code(user_id=user_id)
 
     await jobs.handle_post_user_creation_job(
-        ctx={"job_try": 1, "db": db}, email="test", user_id=user_id, user_code=code
+        {"job_try": 1, "db": db}, email="test", user_id=user_id, user_code=code
     )
 
 
 async def test_handle_post_user_creation_job_mail_failed_but_retryable(
-    anyio_backend, monkeypatch_session, redis, db, create_user, create_user_code
+    anyio_backend,
+    monkeypatch,
+    monkeypatch_session,
+    db,
+    create_user,
+    create_user_code,
 ):
+    monkeypatch.setattr(config, "WORKER_MAX_TRIES", 1)
+
     async def send_mail(_, __):
         raise jobs.RetryableMailError
 
@@ -28,5 +36,5 @@ async def test_handle_post_user_creation_job_mail_failed_but_retryable(
 
     with pytest.raises(Retry):
         await jobs.handle_post_user_creation_job(
-            ctx={"job_try": 1, "db": db}, email="test", user_id=user_id, user_code=code
+            {"job_try": 1, "db": db}, email="test", user_id=user_id, user_code=code
         )

@@ -3,6 +3,7 @@ import datetime
 import httpx
 from httpx import AsyncClient
 
+from app import config
 from app.main import app
 from app.utils.redis.connect import redis_pool
 
@@ -25,7 +26,7 @@ async def test_create_user(anyio_backend, db, redis):
         assert result[1] == 0
 
     redis = await redis_pool().get_redis()
-    jobs = await redis.queued_jobs()
+    jobs = await redis.queued_jobs(queue_name=config.QUEUE_NAME)
 
     assert len(jobs) == 1
     assert jobs[0].kwargs["email"] == "test"

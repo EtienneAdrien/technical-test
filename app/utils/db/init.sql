@@ -150,6 +150,14 @@ ALTER TABLE ONLY public.user_data
 
 
 --
+-- Name: user_data user_email_unique_email; Type: CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.user_data
+    ADD CONSTRAINT user_email_unique_email UNIQUE (email);
+
+
+--
 -- Name: user_code user_code_user_data_user_id_fk; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
