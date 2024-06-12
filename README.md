@@ -5,6 +5,8 @@ To start the application, execute the following command:
 docker compose --profile app up --build -d
 ```
 
+The API is served at `localhost:8080`
+
 The API and worker will wait for the databases containers to be healthy, but if you encounter any connection problem between them,
 restarting the containers should fix the problem.
 ```
