@@ -23,5 +23,5 @@ class UserCreatedResponse(schemas.Success):
 
 
 class TestUserResponse(schemas.Success):
-    message: str = "User successfully validated"
+    message: str = "User successfully activated"
     user_email: str

@@ -14,5 +14,9 @@ class UserCodeAvailabilityNeverStartedError(InvalidUserCodeError):
     pass
 
 
+class UserAlreadyActivatedError(Exception):
+    pass
+
+
 class RetryableMailError(Exception):
     pass

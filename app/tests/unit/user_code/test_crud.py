@@ -64,6 +64,16 @@ async def test_get_user_code_no_user_code_found(anyio_backend, db, create_user):
         await crud.get_user_code(conn=db, user_email="test", user_code="1234")
 
 
+async def test_get_user_code_already_activated_user(
+    anyio_backend, db, create_user, create_user_code
+):
+    user_id = await create_user(email="test", password="test", activated=True)
+    await create_user_code(user_id=user_id, code="1234")
+
+    with pytest.raises(exceptions.UserAlreadyActivatedError):
+        await crud.get_user_code(conn=db, user_email="test", user_code="1234")
+
+
 async def test_get_user_code_no_user_found(anyio_backend, db, create_user):
     with pytest.raises(exceptions.UserCodeNotFoundError):
         await crud.get_user_code(conn=db, user_email="test", user_code="1234")

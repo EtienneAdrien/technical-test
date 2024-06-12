@@ -10,7 +10,11 @@ from app import config
 from app.features import user_code, user
 from app.features.schemas import Success, UnexpectedError
 from app.features.user import schemas, crud, exceptions
-from app.features.user_code.exceptions import InvalidUserCodeError, ExpiredUserCodeError
+from app.features.user_code.exceptions import (
+    InvalidUserCodeError,
+    ExpiredUserCodeError,
+    UserAlreadyActivatedError,
+)
 from app.logging import logger
 from app.utils.db.connect import get_db
 from app.utils.redis.connect import get_redis
@@ -80,8 +84,13 @@ async def validate_user(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Expired user code",
         )
+    except UserAlreadyActivatedError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already activated",
+        )
 
-    return Success(message="User successfully validated")
+    return Success(message="User successfully activated")
 
 
 @router.get("/")

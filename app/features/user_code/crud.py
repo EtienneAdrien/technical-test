@@ -73,7 +73,7 @@ async def get_user_code(user_email: str, user_code: str, conn: ACT) -> schemas.U
     cursor = conn.cursor()
     await cursor.execute(
         """
-        SELECT user_data.user_id, user_code.code, user_code.date_start_validity 
+        SELECT user_data.user_id, user_code.code, user_code.date_start_validity, user_data.activated 
         FROM user_data JOIN user_code ON user_code.user_id = user_data.user_id 
         WHERE user_data.email = %s
         AND user_code.code = %s
@@ -85,6 +85,9 @@ async def get_user_code(user_email: str, user_code: str, conn: ACT) -> schemas.U
 
     if not result:
         raise exceptions.UserCodeNotFoundError()
+
+    if result[3]:
+        raise exceptions.UserAlreadyActivatedError()
 
     return schemas.UserCode(
         user_id=result[0],
