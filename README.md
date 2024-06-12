@@ -16,6 +16,9 @@ This command will construct and initiate all containers in the background.
 Additionally, two volumes named database (for PostgreSQL) and redis (for Redis) will be created and linked in 
 the project's root directory.
 
+### Get the user code after creating the user
+After you created the user, you can get the code associated to it in the `worker logs`
+
 ### Executing the tests
 We utilize docker compose to execute the tests, ensuring access to PostgreSQL and Redis. Separate test databases 
 are employed for each, preventing conflicts with development databases.
