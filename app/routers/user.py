@@ -9,7 +9,7 @@ from psycopg_pool.abc import ACT
 from app import config
 from app.features import user_code, user
 from app.features.schemas import Success, UnexpectedError
-from app.features.user import schemas, crud
+from app.features.user import schemas, crud, exceptions
 from app.features.user_code.exceptions import InvalidUserCodeError, ExpiredUserCodeError
 from app.logging import logger
 from app.utils.db.connect import get_db
@@ -31,7 +31,14 @@ async def create_user(
     email the user with his code, so he can activate his account.
     """
     logger.debug(f"Creating user {user_.email}")
-    user_id, user_code_ = await crud.create_user_with_code(user=user_, conn=db)
+
+    try:
+        user_id, user_code_ = await crud.create_user_with_code(user=user_, conn=db)
+    except exceptions.UserAlreadyExistsError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already exists",
+        )
 
     await redis.enqueue_job(
         function="handle_post_user_creation_job",

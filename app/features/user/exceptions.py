@@ -8,3 +8,7 @@ class UserNotActivatedError(Exception):
 
 class UserNotFoundError(Exception):
     pass
+
+
+class UserAlreadyExistsError(Exception):
+    pass

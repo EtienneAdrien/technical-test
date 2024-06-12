@@ -34,6 +34,17 @@ async def test_create_user_with_code(anyio_backend, db):
         assert not user_code_obj[1]
 
 
+async def test_create_user_with_code_user_already_exists(
+    anyio_backend, db, create_user
+):
+    await create_user(email="test", password="test")
+
+    with pytest.raises(exceptions.UserAlreadyExistsError):
+        await crud.create_user_with_code(
+            conn=db, user=schemas.UserIn(email="test", password="testtest")
+        )
+
+
 async def test_update_user_activation(anyio_backend, db, create_user):
     user = await create_user(email="test", password="test")
 

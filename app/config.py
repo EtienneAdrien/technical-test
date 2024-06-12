@@ -3,7 +3,7 @@ import os
 USER_CODE_VALIDITY_MS = int(os.environ["USER_CODE_VALIDITY_MS"])
 WORKER_MAX_TRIES = int(os.environ["WORKER_MAX_TRIES"])
 QUEUE_NAME = os.environ["QUEUE_NAME"]
-FORCE_JOB_TO_FAIL = os.environ["FORCE_JOB_TO_FAIL"]
+FORCE_JOB_TO_FAIL = int(os.environ["FORCE_JOB_TO_FAIL"])
 JOB_RETRY_DELAY = int(os.environ["JOB_RETRY_DELAY"])
 
 REDIS_HOST = os.environ["REDIS_HOST"]

@@ -1,3 +1,4 @@
+from psycopg.errors import UniqueViolation
 from psycopg_pool.abc import ACT
 
 from app.features.user import schemas, exceptions
@@ -18,10 +19,13 @@ async def create_user_with_code(conn: ACT, user: schemas.UserIn) -> (int, str):
     password = security.hash_password(user.password)
 
     async with conn.transaction():
-        await cursor.execute(
-            "INSERT INTO user_data (email, password) VALUES (%s, %s) RETURNING user_id",
-            (user.email.lower(), password),
-        )
+        try:
+            await cursor.execute(
+                "INSERT INTO user_data (email, password) VALUES (%s, %s) RETURNING user_id",
+                (user.email.lower(), password),
+            )
+        except UniqueViolation:
+            raise exceptions.UserAlreadyExistsError()
 
         result = await cursor.fetchone()
         user_id = result[0]

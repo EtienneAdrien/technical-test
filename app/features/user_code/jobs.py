@@ -1,5 +1,6 @@
 import asyncio
 import functools
+import logging
 import random
 
 from arq import Retry
@@ -7,7 +8,8 @@ from arq.jobs import Job
 
 from app import config
 from app.features.user_code import crud
-from app.logging import logger
+
+logger = logging.getLogger("arq")
 
 
 class RetryableMailError(Exception):
@@ -18,7 +20,7 @@ async def send_mail(email, user_code):
     """
     Fake sending an email by waiting a random x seconds.
     """
-    logger.debug(f"Sending mail to {email} with code {user_code}")
+    logger.info(f"Sending mail to {email} with code {user_code}")
 
     if config.FORCE_JOB_TO_FAIL:
         raise RetryableMailError
@@ -77,6 +79,7 @@ async def handle_post_user_creation_job(
     try:
         await send_mail(email, user_code)
     except RetryableMailError:
+        logger.exception("Failed to send mail")
         raise Retry(defer=ctx["job_try"] * config.JOB_RETRY_DELAY)
 
     await crud.start_activation(conn=ctx["db"], user_id=user_id, user_code=user_code)
